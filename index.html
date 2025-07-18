@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Place</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .file-input-container {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-container input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            border: 2px dashed #d1d5db;
+            border-radius: 12px;
+            background: #f8f9fa;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #6b7280;
+            font-size: 0.95em;
+        }
+
+        .file-input-label:hover {
+            border-color: #667eea;
+            background: #f0f0ff;
+            color: #667eea;
+        }
+
+        .file-input-label.has-file {
+            border-color: #10b981;
+            background: #f0fdf4;
+            color: #10b981;
+        }
+
+        .file-preview {
+            display: none;
+            margin-top: 10px;
+            padding: 8px;
+            background: #f0fdf4;
+            border-radius: 8px;
+            color: #10b981;
+            font-size: 0.9em;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .status.loading {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+
+        .required {
+            color: #ef4444;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏡 Add New Place</h1>
+            <p>Share your amazing place with the world</p>
+        </div>
+
+        <form id="placeForm">
+            <div class="form-group">
+                <label for="location">📍 Location <span class="required">*</span></label>
+                <input type="text" id="location" placeholder="Enter location (e.g., Mumbai, India)" required>
+            </div>
+
+            <div class="form-group">
+                <label for="name">🏠 Place Name <span class="required">*</span></label>
+                <input type="text" id="name" placeholder="Enter place name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">📝 Description</label>
+                <textarea id="description" placeholder="Describe your place, amenities, and what makes it special..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="foot">📏 Area (sq ft)</label>
+                <input type="text" id="foot" placeholder="Enter area in square feet">
+            </div>
+
+            <div class="form-group">
+                <label for="price">💰 Price <span class="required">*</span></label>
+                <input type="text" id="price" placeholder="Enter price (₹)" required>
+            </div>
+
+            <div class="image-grid">
+                <div class="form-group">
+                    <label>📸 Image 1 <span class="required">*</span></label>
+                    <div class="file-input-container">
+                        <input type="file" id="image1" accept="image/*" required>
+                        <label for="image1" class="file-input-label">
+                            📤 Click to upload main image
+                        </label>
+                        <div class="file-preview" id="preview1"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>📸 Image 2</label>
+                    <div class="file-input-container">
+                        <input type="file" id="image2" accept="image/*">
+                        <label for="image2" class="file-input-label">
+                            📤 Click to upload additional image
+                        </label>
+                        <div class="file-preview" id="preview2"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>📸 Image 3</label>
+                    <div class="file-input-container">
+                        <input type="file" id="image3" accept="image/*">
+                        <label for="image3" class="file-input-label">
+                            📤 Click to upload additional image
+                        </label>
+                        <div class="file-preview" id="preview3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <span class="loading-spinner" id="spinner"></span>
+                <span id="btnText">🚀 Post Place</span>
+            </button>
+        </form>
+
+        <div class="status" id="status"></div>
+    </div>
+
+    <!-- Supabase Script -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Supabase configuration
+        const supabaseUrl = 'https://nrmmjgnsdbnqzyuqtslo.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ybW1qZ25zZGJucXp5dXF0c2xvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI4NTE3MzcsImV4cCI6MjA2ODQyNzczN30.izC4hAz4K2sDO1CLEWuA3E5bRh8FxIse9jtSPMJv-rw';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // File input handlers
+        document.getElementById('image1').addEventListener('change', (e) => handleFileSelect(e, 'preview1'));
+        document.getElementById('image2').addEventListener('change', (e) => handleFileSelect(e, 'preview2'));
+        document.getElementById('image3').addEventListener('change', (e) => handleFileSelect(e, 'preview3'));
+
+        function handleFileSelect(event, previewId) {
+            const file = event.target.files[0];
+            const label = event.target.nextElementSibling;
+            const preview = document.getElementById(previewId);
+            
+            if (file) {
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    showStatus('Please select a valid image file', 'error');
+                    event.target.value = '';
+                    return;
+                }
+                
+                // Validate file size (5MB limit)
+                if (file.size > 5 * 1024 * 1024) {
+                    showStatus('Image size should be less than 5MB', 'error');
+                    event.target.value = '';
+                    return;
+                }
+                
+                label.classList.add('has-file');
+                label.textContent = `✅ ${file.name}`;
+                preview.style.display = 'block';
+                preview.textContent = `📁 ${(file.size / 1024 / 1024).toFixed(2)} MB`;
+            } else {
+                label.classList.remove('has-file');
+                label.textContent = '📤 Click to upload image';
+                preview.style.display = 'none';
+            }
+        }
+
+        function encodeImage(fileInput) {
+            return new Promise((resolve) => {
+                const file = fileInput.files[0];
+                if (!file) return resolve('');
+                
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => resolve('');
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.className = `status ${type}`;
+            status.innerHTML = message;
+            status.style.display = 'block';
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        function setLoading(isLoading) {
+            const submitBtn = document.getElementById('submitBtn');
+            const spinner = document.getElementById('spinner');
+            const btnText = document.getElementById('btnText');
+            
+            if (isLoading) {
+                submitBtn.disabled = true;
+                spinner.style.display = 'inline-block';
+                btnText.textContent = 'Posting...';
+            } else {
+                submitBtn.disabled = false;
+                spinner.style.display = 'none';
+                btnText.textContent = '🚀 Post Place';
+            }
+        }
+
+        // Form submission
+        document.getElementById('placeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Get form values
+            const location = document.getElementById('location').value.trim();
+            const name = document.getElementById('name').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const foot = document.getElementById('foot').value.trim();
+            const price = document.getElementById('price').value.trim();
+            
+            // Validate required fields
+            if (!location || !name || !price) {
+                showStatus('❌ Please fill in all required fields', 'error');
+                return;
+            }
+            
+            // Validate at least one image
+            if (!document.getElementById('image1').files[0]) {
+                showStatus('❌ Please upload at least one image', 'error');
+                return;
+            }
+            
+            setLoading(true);
+            showStatus('📤 Uploading images and saving place...', 'loading');
+            
+            try {
+                // Encode images
+                const image1 = await encodeImage(document.getElementById('image1'));
+                const image2 = await encodeImage(document.getElementById('image2'));
+                const image3 = await encodeImage(document.getElementById('image3'));
+                
+                // Insert into database
+                const { error } = await supabase.from('places').insert([{
+                    location,
+                    name,
+                    description,
+                    foot: foot,
+                    price: price,
+                    image1base64: image1,
+                    image2base64: image2,
+                    image3base64: image3
+                }]);
+                
+                if (error) {
+                    throw error;
+                }
+                
+                showStatus('🎉 Place added successfully! It will be visible shortly.', 'success');
+                
+                // Reset form
+                document.getElementById('placeForm').reset();
+                
+                // Reset file previews
+                document.querySelectorAll('.file-input-label').forEach(label => {
+                    label.classList.remove('has-file');
+                    label.textContent = '📤 Click to upload image';
+                });
+                document.querySelectorAll('.file-preview').forEach(preview => {
+                    preview.style.display = 'none';
+                });
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showStatus(`❌ Error: ${error.message}`, 'error');
+            } finally {
+                setLoading(false);
+            }
+        });
+    </script>
+</body>
+</html>
